@@ -16,16 +16,19 @@ import io.goosople.poemtimewear.PoemTimeUtils.Companion.poemTotalNumber
 import io.goosople.poemtimewear.databinding.ActivityMainBinding
 import java.util.*
 
-//@Suppress("DEPRECATION")
+
+@Suppress("DEPRECATION")
 class MainActivity : Activity(), TextToSpeech.OnInitListener {
 
     private lateinit var binding: ActivityMainBinding
 
     private var isPlaying = false
     private var poemNum = 0
+    private var vClick = 0
+    private var vClickTime = System.currentTimeMillis()
 
     // poem data
-    private lateinit var poemData:PoemData
+    private lateinit var poemData: PoemData
 
     private var tTaskHandler = Handler {
         val sP = PreferenceManager.getDefaultSharedPreferences(this)
@@ -91,6 +94,16 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         }
 
         // === button initialize ===
+        binding.closeView.setOnClickListener {
+            val deltaT = System.currentTimeMillis() - vClickTime
+            if (deltaT < 1000) {
+                Toast.makeText(this, "${3 - vClick} to exit", Toast.LENGTH_SHORT).show()
+            } else if (deltaT >= 1000) vClick = 0
+            if (vClick >= 3) finish()
+            vClick++
+            vClickTime = System.currentTimeMillis()
+        }
+
         binding.play.setOnClickListener {
             isPlaying = !isPlaying
             onPlayPress(it as ImageButton, isPlaying)
@@ -194,7 +207,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         mTextToSpeech.shutdown()
+        super.onDestroy()
     }
 }
